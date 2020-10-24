@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "name": "Foxy Customer Portal Guard Worker",
+  "version": "1.0.0",
+  "description": "A Cloudflare Worker to reuse Foxy.io Customer Portal Authentication to restrict access to pages or contents within a page",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write '**/*.{js,css,json,md}'"
+  },
+  "author": "ndvo <nelson@ocastudios.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "prettier": "^1.18.2",
+    "standard": "^15.0.0"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1"
+  }
+}
