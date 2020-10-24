@@ -1,4 +1,4 @@
-# `worker-template` Foxy.io Customer Portal Authentication Guard
+# Foxy.io Customer Portal Authentication Guard
 
 A template for creating a Cloudflare Worker that will act as a guard to restrict access only to pages only for users authenticated at the Customer Portal.
 
