@@ -7,13 +7,14 @@ Simply click the button bellow to go deploy. If you need them, instructions on f
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ndvo/foxy-customer-portal-guard)
 
-1 - Authorize Cloudflare to access your GitHub account
-1 - Connect to your Cloudflare account
+
+1. Authorize Cloudflare to access your GitHub account
+1. Connect to your Cloudflare account
     - Log in to your Cloudflare account, go to your profile page
     - Client ID: To get your Client ID, click the "Menu" next to Cloudflare's logo and, under "Products", click Workers. Your Client ID will be on the right sidebar.
     - API Token: Click the "API Tokens" tab. Select an appropriate token or create a new one. If you'll use an existing, on the rightmost menu choose "Roll" and copy the token. If you prefer to create a new one, click the "Create Token" button an select the template "Edit Workers".
-1 - Fork the repository: to create your own version of this worker.
-1 - Activate GitHub actions
+1. Fork the repository: to create your own version of this worker.
+1. Activate GitHub actions
 
 
 
