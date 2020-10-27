@@ -15,6 +15,7 @@ jobs:
         uses: cloudflare/wrangler-action@1.2.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          FX_JWT_SECRET: ${{ secrets.FX_JWT_SECRET }} 
+          secrets: FX_JWT_SECRET
         env:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          FX_JWT_SECRET: ${{ secrets.FX_JWT_SECRET }}
