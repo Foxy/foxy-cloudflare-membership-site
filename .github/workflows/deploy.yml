@@ -11,12 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: npm install
+      - run: ls node_modules
       - name: Publish
         uses: cloudflare/wrangler-action@1.2.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          preCommands: npm install
           secrets: FX_JWT_SECRET
         env:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-          FX_JWT_SECRET: ${{ secrets.FX_JWT_SECRET }}
+      - name: Deploy to Cloudflare Workers with Wrangler
+        # You may pin to the exact commit or the version.
+        # uses: cloudflare/wrangler-action@21f14faa062c33c938e3f37c30d52021bed521cb
+        uses: cloudflare/wrangler-action@1.2.0
+        with:
+          apiToken:  ${{ secrets.CF_API_TOKEN }}
+          secrets: |
+            FX_JWT_SECRET
+          workingDirectory: .
