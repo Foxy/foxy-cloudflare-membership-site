@@ -5,11 +5,10 @@ on:
       - main
       - master
   repository_dispatch:
+  
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    needs: test
     steps:
       - uses: actions/checkout@v2
       - name: Publish
