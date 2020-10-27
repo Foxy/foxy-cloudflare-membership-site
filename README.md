@@ -2,7 +2,7 @@
 
 A template for creating a Cloudflare Worker that will act as a guard to restrict access only to pages only for users authenticated at the Customer Portal.
 
-** This Cloudflare Worker is meant to be used with Foxy Customer Portal ** : https://github.com/Foxy/foxy-customer-portal
+**This Cloudflare Worker is meant to be used with Foxy Customer Portal** : https://github.com/Foxy/foxy-customer-portal
 
 You may use this worker as is or customize it on your own risk.
 
