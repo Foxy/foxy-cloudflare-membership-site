@@ -1,5 +1,8 @@
 # Foxy.io Customer Portal Authentication Guard
 
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ndvo/foxy-customer-portal-guard)
+
+
 A template for creating a Cloudflare Worker that will act as a guard to restrict access only to pages only for users authenticated at the Customer Portal.
 
 ** This Cloudflare Worker is meant to be used with Foxy Customer Portal ** : https://github.com/Foxy/foxy-customer-portal
