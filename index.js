@@ -65,6 +65,12 @@ function verify (request) {
   return payload
 }
 
+function cleanURL (dirtyURL) {
+  return dirtyURL.trim()
+    .replace(/\/$/, '')
+    .replace(/([^:])\/\/+/, '$1://')
+}
+
 async function handleRequest (request) {
   const responsePromise = fetch(request)
   if (verify(request)) {
@@ -78,7 +84,14 @@ async function handleRequest (request) {
       .on('[data-restricted]', new OmitHandler())
       .transform(response)
     if (!loginHandler.login && FX_REDIRECT) {
-      return Response.redirect(FX_REDIRECT, 302)
+      const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, '$1')
+      const loginPage = `${domain}${FX_REDIRECT}`
+      console.log('VEJAMOS', cleanURL(request.url), cleanURL(loginPage))
+      if (cleanURL(request.url) !== cleanURL(loginPage)) {
+        return Response.redirect(loginPage, 302)
+      } else {
+        return transformedResponse
+      }
     } else {
       return transformedResponse
     }
