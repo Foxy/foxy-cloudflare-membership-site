@@ -1,4 +1,4 @@
-name = "Foxy Customer Portal Authentication Guard"
+name = "foxy_customer_portal_authentication_guard"
 type = "webpack"
 account_id = "ef49b74aa7e763d13ef6546c988292c3"
 workers_dev = true
