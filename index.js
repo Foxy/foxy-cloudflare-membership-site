@@ -1,9 +1,10 @@
-/* global fetch, Response, HTMLRewriter, addEventListener, FX_REDIRECT,
+/* global fetch, Response, Headers, HTMLRewriter, addEventListener, FX_REDIRECT,
   FX_OMIT, FX_JWT_SECRET
   */
 const jwt = require('jsonwebtoken')
 
 const FX_CUSTOMER_JWT_COOKIE = 'fx.customer.jwt'
+const FX_CUSTOMER_DESTINATION_COOKIE = 'fx.cf.guard.destination'
 
 /** Cloudflare Worker method */
 addEventListener('fetch', event => {
@@ -75,7 +76,18 @@ async function handleRequest (request) {
   const responsePromise = fetch(request)
   const session = await verify(request)
   if (session) {
-    // User is authenticated: nothing to do
+    // User is authenticated
+    const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, '$1')
+    const loginPage = `${domain}${FX_REDIRECT}`
+    if (cleanURL(request.url) !== cleanURL(loginPage)) {
+      const destination = getCookie(request, FX_CUSTOMER_DESTINATION_COOKIE)
+      if (destination) {
+        // Remove destination cookie
+        const response = Response.redirect(destination, 303)
+        response.headers.append('Set-Cookie', `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(request.url)}`)
+        return response
+      }
+    }
     return responsePromise
   } else {
     const response = await responsePromise
@@ -88,7 +100,15 @@ async function handleRequest (request) {
       const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, '$1')
       const loginPage = `${domain}${FX_REDIRECT}`
       if (cleanURL(request.url) !== cleanURL(loginPage)) {
-        return Response.redirect(loginPage, 302)
+        return new Response(null,
+          {
+            status: 302,
+            headers: new Headers([
+              ['location', loginPage],
+              ['Set-Cookie', `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(request.url)}; Path=/`]
+            ])
+          }
+        )
       } else {
         return transformedResponse
       }

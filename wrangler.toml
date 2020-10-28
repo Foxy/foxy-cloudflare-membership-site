@@ -5,10 +5,10 @@ webpack_config = "webpack.development.js"
 workers_dev = true
 route = ""
 zone_id = ""
-vars = { FX_REDIRECT = "/login", FX_OMIT = "true" }
+vars = { FX_REDIRECT = "/login/", FX_OMIT = "true" }
 
 
 [env.production]
 name = "foxy_customer_portal_authentication_guard"
 webpack_config = "webpack.config.js"
-vars = { FX_REDIRECT = "/login", FX_OMIT = "true" }
+vars = { FX_REDIRECT = "/login/", FX_OMIT = "true" }
