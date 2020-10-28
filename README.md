@@ -1,5 +1,26 @@
 # Foxy.io Customer Portal Authentication Guard
 
+### Overview
+
+Cloudflare Workers sit on the "edge" between the Frontend and the Backend.
+
+You can set a Cloudflare Worker to your domain, regardless of where your server lives.
+
+It works even if your server is operated by a third party.
+
+The Foxy.io Customer Portal Authentication Guard is a Cloudflare Worker that takes advantage of the fact that your customer is already logged in with Foxy Customer Portal to give you the ability to restrict access to certain pages or certain sections of your pages only to authenticated users.
+
+This means you can provide a restricted area even if you are working with a JAMStack application such as 11ty.js, a purely static HTML page or a website running in a third party server.
+
+Here's how it works:
+
+1. You create an account at Foxy.io
+1. You create an account at Cloudflare
+1. You configure your Domain to use Cloudflare's nameservers
+1. At this step you get enhanced protection and performance for free from Cloudflare up until 100.000 requests per month
+1. You set up your Customer Portal from Foxy.io. Now your customers will have a dynamic portal to check their purchases and other details inside your application, wherever it is hosted.
+1. You configure this guard. Now you can configure restricted pages or even restricted sections within a page.
+
 
 ## Deploy to Cloudflare Workers
 
