@@ -25,8 +25,6 @@ A template for creating a Cloudflare Worker that will act as a guard to restrict
 
 You may use this worker as is or customize it on your own risk.
 
-## How to use this repository
-
 
 ### Configuring your worker
 
@@ -41,6 +39,24 @@ Look for the line `[vars]` and edit the values your variables:
 | `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login' |
 | `FX_OMIT` | If you wish the worker to remove any tags with the attribute `data-restricted` if the user is not authenticated.| "true" any other value is considered false |
 
+### Configure your Domain
+
+If your domain is not yet using Cloudflare's services, log in to your Cloudflare's account, click the "Add site" button and follow the instructions.
+
+Please note that to use this service you will need to configure your domain to use Cloudflare's nameservers.
+
+When your domain is active, access your domain configuration page by clicking its box in your Cloudflare panel, then click the "Workers" button and finally click the "Add route" button.
+
+This interface will allow you to choose to which pages in your site the worker will be active.
+
+**This worker should be active in all pages you wish to restrict access.**
+
+Example:
+
+Use `customer/*` to protect pages such as `customer/members-only-products` and `customer/reach-out`.
+
+Be careful with trailing slashes when setting your routes. [Learn more about matching behaviour of routes](https://developers.cloudflare.com/workers/platform/routes#matching-behavior)
+
 
 #### Setting your JWT Shared Secret
 
@@ -50,13 +66,21 @@ Installation instructions are provided here: https://developers.cloudflare.com/w
 
 Further documentation for Wrangler can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler).
 
-After installation, log in to Cloudflare:
+After installation, authenticate to Cloudflare.
+
+You can do this in one of two ways: with `wrangler login` or `wrangler config`.
+
+- Authenticate with `wrangler login`. It will open a browser for you to authenticate and then ask you to authorize `wrangler`.
 
 ```bash
 wrangler login
 ```
 
-It will open a browser for you to authenticate and then ask you to authorize `wrangler`.
+- Authenticate with `wrangler config`. First grab your token from your Cloudflare Workers account
+
+```bash
+wrangler config
+```
 
 Next, set your secret:
 
@@ -66,7 +90,6 @@ wrangler secret put FX_JWT_SECRET
 
 The tool will ask you for your secret. This is the secret you created when setting your Customer Portal.
 Please, refer to [How to configure my Customer Portal] bellow if you need to configure your Customer Portal.
-
 
 
 #### How to configure my Customer Portal
@@ -110,8 +133,11 @@ Notice you can check your existing customers using this API path:
 
 You can POST to `fx:customers` to create a new customer to test the Guard.
 
+# Development
 
 
+You'll need `wrangler` to run your worker in a development environment. 
+You'll need `cloudflared` to view logs from production, if you need it. [View instructions to install it.](https://developers.cloudflare.com/argo-tunnel/downloads)
 
 
 
