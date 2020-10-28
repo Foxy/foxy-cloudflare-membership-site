@@ -22,8 +22,8 @@ function getCookie (request, name) {
   if (cookieString) {
     const cookies = cookieString.split(';')
     for (let c = 0; c < cookies.length; c += 1) {
-      const cookie = cookies[c].split(';')
-      if (name === cookie[0].trim()) {
+      const cookie = cookies[c].split('=', 2)
+      if (name === cookie[0].trim() && cookie.length === 2) {
         result = cookie[1]
         break
       }
@@ -53,12 +53,12 @@ class LoginFormHandler {
  * @param {Request} request incoming Request
  * @return {payload} JWT payload or null if invalid or absent JWT
  */
-function verify (request) {
+async function verify (request) {
   const jwtString = getCookie(request, FX_CUSTOMER_JWT_COOKIE)
   if (!jwtString) return false
   let payload
   try {
-    payload = jwt.verify(jwtString, FX_JWT_SECRET)
+    payload = await jwt.verify(jwtString, FX_JWT_SECRET)
   } catch (e) {
     payload = null
   }
@@ -73,7 +73,8 @@ function cleanURL (dirtyURL) {
 
 async function handleRequest (request) {
   const responsePromise = fetch(request)
-  if (verify(request)) {
+  const session = await verify(request)
+  if (session) {
     // User is authenticated: nothing to do
     return responsePromise
   } else {
@@ -86,7 +87,6 @@ async function handleRequest (request) {
     if (!loginHandler.login && FX_REDIRECT) {
       const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, '$1')
       const loginPage = `${domain}${FX_REDIRECT}`
-      console.log('VEJAMOS', cleanURL(request.url), cleanURL(loginPage))
       if (cleanURL(request.url) !== cleanURL(loginPage)) {
         return Response.redirect(loginPage, 302)
       } else {
