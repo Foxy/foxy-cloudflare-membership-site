@@ -79,13 +79,20 @@ async function handleRequest (request) {
     // User is authenticated
     const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, '$1')
     const loginPage = `${domain}${FX_REDIRECT}`
-    if (cleanURL(request.url) !== cleanURL(loginPage)) {
+    if (cleanURL(request.url) === cleanURL(loginPage)) {
       const destination = getCookie(request, FX_CUSTOMER_DESTINATION_COOKIE)
       if (destination) {
-        // Remove destination cookie
-        const response = Response.redirect(destination, 303)
-        response.headers.append('Set-Cookie', `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(request.url)}`)
-        return response
+        // Remove destination cookie and redirect to destination
+        return new Response(
+          null,
+          {
+            status: 303,
+            headers: new Headers([
+              ['location', destination],
+              ['Set-Cookie', `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(request.url)}; Path=/`]
+            ])
+          }
+        )
       }
     }
     return responsePromise
