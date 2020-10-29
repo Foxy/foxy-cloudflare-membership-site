@@ -1,7 +1,7 @@
-/* global fetch, Response, Headers, HTMLRewriter, addEventListener, FX_REDIRECT,
+/* global HTMLRewriter, FX_REDIRECT,
   FX_OMIT, FX_JWT_SECRET
   */
-const jwt = require('jsonwebtoken')
+import * as jwt from 'jsonwebtoken';
 
 const FX_CUSTOMER_JWT_COOKIE = 'fx.customer.jwt'
 const FX_CUSTOMER_DESTINATION_COOKIE = 'fx.cf.guard.destination'
@@ -16,6 +16,7 @@ addEventListener('fetch', event => {
  *
  * @param {Request} request incoming Request
  * @param {string} name of the cookie to get
+ * @returns {string} the cookie value
  */
 function getCookie (request, name) {
   let result = ''
@@ -52,7 +53,7 @@ class LoginFormHandler {
  * Verify the request has a valid Customer Portal Foxy JWT
  *
  * @param {Request} request incoming Request
- * @return {payload} JWT payload or null if invalid or absent JWT
+ * @returns {string} JWT payload or null if invalid or absent JWT
  */
 async function verify (request) {
   const jwtString = getCookie(request, FX_CUSTOMER_JWT_COOKIE)
@@ -66,12 +67,24 @@ async function verify (request) {
   return payload
 }
 
+/**
+ * Simplifies a given URL string
+ *
+ * @param {string} dirtyURL to be fixed
+ * @returns {string} fixed URL string
+ */
 function cleanURL (dirtyURL) {
   return dirtyURL.trim()
     .replace(/\/$/, '')
     .replace(/([^:])\/\/+/, '$1://')
 }
 
+/**
+ * Handles the request
+ *
+ * @param {Request} request to be handled
+ * @returns {Response|Promise<Response>} response
+ */
 async function handleRequest (request) {
   const responsePromise = fetch(request)
   const session = await verify(request)
@@ -86,11 +99,11 @@ async function handleRequest (request) {
         return new Response(
           null,
           {
-            status: 303,
             headers: new Headers([
               ['location', destination],
               ['Set-Cookie', `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(request.url)}; Path=/`]
-            ])
+            ]),
+            status: 303
           }
         )
       }
@@ -109,11 +122,11 @@ async function handleRequest (request) {
       if (cleanURL(request.url) !== cleanURL(loginPage)) {
         return new Response(null,
           {
-            status: 302,
             headers: new Headers([
               ['location', loginPage],
               ['Set-Cookie', `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(request.url)}; Path=/`]
-            ])
+            ]),
+            status: 302
           }
         )
       } else {
