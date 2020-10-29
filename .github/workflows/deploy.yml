@@ -4,10 +4,6 @@ on:
     branches: 
       - main
       - master
-  repository_dispatch:
-    branches: 
-      - main
-      - master
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
