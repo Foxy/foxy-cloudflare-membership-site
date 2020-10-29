@@ -4,6 +4,11 @@ on:
     branches: 
       - main
       - master
+inputs:
+  jwt_shared_secret:
+    description: 'The Customer Portal JWT Shared Secret'
+    required: false
+    default: '1'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -18,5 +23,8 @@ jobs:
         uses: cloudflare/wrangler-action@1.2.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
+          secrets: |
+            FX_JWT_SECRET
         env:
+          FX_JWT_SECRET: ${{ INPUT_JWT_SHARED_SECRET }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
