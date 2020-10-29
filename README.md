@@ -1,51 +1,70 @@
 # Foxy.io Customer Portal Authentication Guard
 
+**This Cloudflare Worker is meant to be used with Foxy Customer Portal** : https://github.com/Foxy/foxy-customer-portal
+
 ### Overview
 
-Cloudflare Workers sit on the "edge" between the Frontend and the Backend.
+[Cloudflare Workers](https://workers.cloudflare.com) sit on the "edge" between the Frontend and the Backend.
 
 You can set a Cloudflare Worker to your domain, regardless of where your server lives.
 
-It works even if your server is operated by a third party.
-
-The Foxy.io Customer Portal Authentication Guard is a Cloudflare Worker that takes advantage of the fact that your customer is already logged in with Foxy Customer Portal to give you the ability to restrict access to certain pages or certain sections of your pages only to authenticated users.
+This worker uses [Foxy.io Customer Portal Authentication](https://github.com/Foxy/foxy-customer-portal) to give you the ability to restrict access to certain pages or certain sections of your pages only to authenticated users.
 
 This means you can provide a restricted area even if you are working with a JAMStack application such as 11ty.js, a purely static HTML page or a website running in a third party server.
 
-Here's how it works:
+#### Restrict access to pages
 
-1. You create an account at Foxy.io
-1. You create an account at Cloudflare
-1. You configure your Domain to use Cloudflare's nameservers
-1. At this step you get enhanced protection and performance for free from Cloudflare up until 100.000 requests per month
-1. You set up your Customer Portal from Foxy.io. Now your customers will have a dynamic portal to check their purchases and other details inside your application, wherever it is hosted.
-1. You configure this guard. Now you can configure restricted pages or even restricted sections within a page.
+If you with to redirect anonymous users to the login page:
 
+- set the `FX_REDIRECT` variable to the Customer Portal page.
+- set the routes to be protected in the Workers tab of your domain administration in Cloudflare
 
-## Deploy to Cloudflare Workers
+This is the default behaviour.
 
-Simply click the button bellow to go deploy. If you need them, instructions on filling the necessary information are bellow the button.
+#### Restrict access to tags
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ndvo/foxy-customer-portal-guard)
+If you wish to restrict only certain tags within a page:
 
-
-1. Authorize Cloudflare to access your GitHub account
-1. Connect to your Cloudflare account
-    - Log in to your Cloudflare account, go to your profile page and grab your *Client ID* and *API Token*:
-        - **Client ID**: To get your Client ID, click the "Menu" next to Cloudflare's logo and, under "Products", click Workers. Your Client ID will be on the right sidebar.
-        - **API Token**: Click the "API Tokens" tab. Select an appropriate token or create a new one.
-            - If you'll use an existing, on the rightmost menu choose "Roll" and copy the token.
-            - If you prefer to create a new one, click the "Create Token" button an select the template "Edit Workers".
-1. Fork the repository: to create your own version of this worker.
-1. Activate GitHub actions
+- set an empty value to `FX_REDIRECT` if you don't want the user to be redirected.
+    - if both omitting tags is enabled and redirecting, tags in the login page can be omitted.
+- set `FX_OMIT` to "true" (this is set by default).
+- add a `data-restricted` attribute to the tags you want to restrict.
 
 
-A template for creating a Cloudflare Worker that will act as a guard to restrict access only to pages only for users authenticated at the Customer Portal.
+```html
+<body>
+    <nav>
+      <a href="/login">login</a>
+    </nav>
+    <section data-restricted="true" class="member-area">
+    </section>
+    <section class="open-area">
+    </section>
+</body>
+```
 
-**This Cloudflare Worker is meant to be used with Foxy Customer Portal** : https://github.com/Foxy/foxy-customer-portal
 
-You may use this worker as is or customize it on your own risk.
+# How to set up
 
+1. Fork this repository
+1. Set up GitHub secrets in your forked repository
+1. Deploy to Cloudflare Workers using the provided GitHub action
+
+## Fork
+
+Click the "fork" button on the top right of this page. Give your repository a proper name.
+
+## Set GitHub secrets
+
+In your forked repository, click the "**Settings**" tab, then the "**Secrets**" tab.
+
+Using the "New secret" button create the following secrets:
+
+| Secret | Description | 
+| -------- | ----------- | 
+| `CF_ACCOUNT_ID` | This is your Cloudflare Id. To get your ID, click the "Menu" next to Cloudflare's logo and, under "Products", click Workers. Your Client ID will be on the right sidebar. [How to get my Cloudflare Id](https://developers.cloudflare.com/workers/learning/getting-started#6a-obtaining-your-account-id-and-zone-id)|
+| `CF_API_TOKEN` | This is your API token. Click the "API Tokens" tab. Select an appropriate token or create a new one. If you'll use an existing, on the rightmost menu choose "Roll" and copy the token. [How to get my Cloudflare API token](https://developers.cloudflare.com/workers/learning/getting-started#option-1-obtaining-your-api-token-recommended)
+| `JWT_SHARED_SECRET`| This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal].|
 
 ### Configuring your worker
 
@@ -53,12 +72,27 @@ On your worker's page, under the `Settings` tab you can edit the variables used 
 
 You may also configure them using the `wrangler.toml` file.
 
-Look for the line `[vars]` and edit the values your variables:
+Look for the line `vars = { ... }` and edit the values your variables:
 
 | Variable | Description | Example |
 | -------- | ----------- | ------- |
 | `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login' |
 | `FX_OMIT` | If you wish the worker to remove any tags with the attribute `data-restricted` if the user is not authenticated.| "true" any other value is considered false |
+
+### Deploy your worker
+
+- Access the "Actions" tab in your GitHub repository.
+- Click the "Deploy to Cloudflare Workers" tab.
+- Click the "Run workflow" button.
+
+If you wish to deploy to Cloudflare after each push, edit the `.github/workflows/deploy.yml` file, and add these lines bellow the second line:
+
+```
+  push:
+    branches: 
+      - main
+      - master
+```
 
 ### Configure your Domain
 
@@ -79,39 +113,9 @@ Use `customer/*` to protect pages such as `customer/members-only-products` and `
 Be careful with trailing slashes when setting your routes. [Learn more about matching behaviour of routes](https://developers.cloudflare.com/workers/platform/routes#matching-behavior)
 
 
-#### Setting your JWT Shared Secret
+# Development
 
-You need to use the `wrangler` tool to set up your secret:
-
-Installation instructions are provided here: https://developers.cloudflare.com/workers/cli-wrangler/install-update
-
-Further documentation for Wrangler can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler).
-
-After installation, authenticate to Cloudflare.
-
-You can do this in one of two ways: with `wrangler login` or `wrangler config`.
-
-- Authenticate with `wrangler login`. It will open a browser for you to authenticate and then ask you to authorize `wrangler`.
-
-```bash
-wrangler login
-```
-
-- Authenticate with `wrangler config`. First grab your token from your Cloudflare Workers account
-
-```bash
-wrangler config
-```
-
-Next, set your secret:
-
-```bash
-wrangler secret put FX_JWT_SECRET
-```
-
-The tool will ask you for your secret. This is the secret you created when setting your Customer Portal.
-Please, refer to [How to configure my Customer Portal] bellow if you need to configure your Customer Portal.
-
+If you wish to customize this Worker, the instructions bellow may be helpful setting up your development environment.
 
 #### How to configure my Customer Portal
 
@@ -152,13 +156,62 @@ Notice you can check your existing customers using this API path:
 
 `API Home` » `fx:store` » `fx:customers`
 
-You can POST to `fx:customers` to create a new customer to test the Guard.
+You can POST to `fx:customers` to create a new customer to test this Worker.
 
-# Development
+# Development environment
 
-
-You'll need `wrangler` to run your worker in a development environment. 
+You'll need `wrangler` to run your worker in a development environment. [View instructions to install it.](https://developers.cloudflare.com/workers/cli-wrangler/install-update)
 You'll need `cloudflared` to view logs from production, if you need it. [View instructions to install it.](https://developers.cloudflare.com/argo-tunnel/downloads)
 
+Installation instructions are provided here: https://developers.cloudflare.com/workers/cli-wrangler/install-update
 
+Further documentation for Wrangler can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler).
+
+After installation, authenticate to Cloudflare.
+
+You can do this in one of two ways: with `wrangler login` or `wrangler config`.
+
+- Authenticate with `wrangler login`. It will open a browser for you to authenticate and then ask you to authorize `wrangler`.
+
+```bash
+wrangler login
+```
+
+- Authenticate with `wrangler config`. First grab your token from your Cloudflare Workers account
+
+```bash
+wrangler config
+```
+
+### Run a development environment
+
+```bash
+wrangler preview --watch
+```
+
+### View logs from production (real time)
+
+```bash
+wrangler tail --env production
+```
+
+You can use [jq](https://stedolan.github.io/jq/) to display a nicely formatted JSON.
+
+```bash
+wrangler tail --env production | jq
+```
+
+### Setting your JWT Shared Secret with wrangler
+
+You need to use the `wrangler` tool to set up your secret:
+
+
+Next, set your secret:
+
+```bash
+wrangler secret put FX_JWT_SECRET
+```
+
+The tool will ask you for your secret. This is the secret you created when setting your Customer Portal.
+Please, refer to [How to configure my Customer Portal] bellow if you need to configure your Customer Portal.
 
