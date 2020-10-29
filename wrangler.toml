@@ -1,6 +1,6 @@
 name = "foxy_customer_portal_authentication_guard_dev"
 type = "webpack"
-account_id = "ef49b74aa7e763d13ef6546c988292c3"
+account_id = "CF_ACCOUNT_ID"
 webpack_config = "webpack.development.js"
 workers_dev = true
 route = ""
