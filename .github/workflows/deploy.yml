@@ -1,20 +1,18 @@
 name: Deploy to Cloudflare Workers
 on:
+  workflow_dispatch:
+    branches: 
+      - main
+      - master
   repository_dispatch:
     branches: 
       - main
       - master
-inputs:
-  jwt_shared_secret:
-    description: 'The Customer Portal JWT Shared Secret'
-    required: false
-    default: '1'
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: env
       - run: sed -i -e "s/CF_ACCOUNT_ID/${{ secrets.CF_ACCOUNT_ID }}/" wrangler.toml
       - uses: actions/setup-node@v2.1.2
         with:
@@ -27,5 +25,5 @@ jobs:
           secrets: |
             FX_JWT_SECRET
         env:
-          FX_JWT_SECRET: ${{ INPUT_JWT_SHARED_SECRET }}
+          FX_JWT_SECRET: ${{ secrets.JWT_SHARED_SECRET }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
