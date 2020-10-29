@@ -14,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: env
       - run: sed -i -e "s/CF_ACCOUNT_ID/${{ secrets.CF_ACCOUNT_ID }}/" wrangler.toml
       - uses: actions/setup-node@v2.1.2
         with:
