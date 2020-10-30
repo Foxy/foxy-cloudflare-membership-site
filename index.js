@@ -1,15 +1,21 @@
-/* global HTMLRewriter, FX_REDIRECT,
-  FX_OMIT, FX_JWT_SECRET
-  */
+/* global HTMLRewriter, FX_REDIRECT, FX_OMIT, FX_JWT_SECRET */
 import * as jwt from "jsonwebtoken";
 
 const FX_CUSTOMER_JWT_COOKIE = "fx.customer.jwt";
 const FX_CUSTOMER_DESTINATION_COOKIE = "fx.cf.guard.destination";
 
 /** Cloudflare Worker method */
-addEventListener("fetch", event => {
-  event.respondWith(handleRequest(event.request));
-});
+try {
+  // Avoid crashing tests
+  addEventListener("fetch", event => {
+    event.respondWith(handleRequest(event.request));
+  });
+} catch(e) {
+  if (e.name !== 'ReferenceError'
+    || e.message !== 'addEventListener is not defined') {
+    throw e;
+  }
+}
 
 /**
  * Gets the cookie with given name from the request headers
