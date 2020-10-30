@@ -64,7 +64,7 @@ Using the "New secret" button create the following secrets:
 | -------- | ----------- | 
 | `CF_ACCOUNT_ID` | This is your Cloudflare Id. To get your ID, click the "Menu" next to Cloudflare's logo and, under "Products", click Workers. Your Client ID will be on the right sidebar. [How to get my Cloudflare Id](https://developers.cloudflare.com/workers/learning/getting-started#6a-obtaining-your-account-id-and-zone-id)|
 | `CF_API_TOKEN` | This is your API token. Click the "API Tokens" tab. Select an appropriate token or create a new one. If you'll use an existing, on the rightmost menu choose "Roll" and copy the token. [How to get my Cloudflare API token](https://developers.cloudflare.com/workers/learning/getting-started#option-1-obtaining-your-api-token-recommended)
-| `JWT_SHARED_SECRET`| This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal].|
+| `JWT_SHARED_SECRET`| This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal](#how-to-configure-my-customer-portal).|
 
 ### Configuring your worker
 
@@ -213,5 +213,3 @@ wrangler secret put FX_JWT_SECRET
 ```
 
 The tool will ask you for your secret. This is the secret you created when setting your Customer Portal.
-Please, refer to [How to configure my Customer Portal] bellow if you need to configure your Customer Portal.
-
