@@ -1,19 +1,21 @@
 {
   "private": true,
-  "name": "Foxy Customer Portal Guard Worker",
+  "name": "foxy_customer_portal_guard_worker",
   "version": "1.0.0",
   "description": "A Cloudflare Worker to reuse Foxy.io Customer Portal Authentication to restrict access to pages or contents within a page",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "wrangler build",
+    "test": "nyc mocha './{,!(node_modules)/**}/*.test.?js'",
+    "build": "wrangler build --env production",
     "format": "prettier --write '**/*.{js,css,json,md}'"
   },
-  "author": "ndvo <nelson@ocastudios.com>",
+  "type": "module",
+  "author": "Foxy.io",
   "license": "MIT",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.6.0",
     "@typescript-eslint/parser": "^4.6.0",
+    "chai": "^4.2.0",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.11.0",
     "eslint-config-prettier": "^6.15.0",
@@ -23,6 +25,8 @@
     "eslint-plugin-lit-a11y": "^1.0.1",
     "eslint-plugin-sort-class-members": "^1.8.0",
     "eslint-plugin-typescript-sort-keys": "^1.5.0",
+    "mocha": "^6.2.3",
+    "nyc": "^15.1.0",
     "prettier": "^1.19.1",
     "typescript": "^4.0.5"
   },
