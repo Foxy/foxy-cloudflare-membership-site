@@ -1,47 +1,59 @@
 /* global HTMLRewriter, FX_REDIRECT, FX_OMIT, FX_JWT_SECRET, handleRequest */
 const { expect } = require('chai');
 const fs = require('fs');
-const mockServer = require('./test/mock/server.cjs');
+const jwt = require('jsonwebtoken');
 require('mocha');
+
 const fetch = require("node-fetch");
-const tunnel = require("tunnel");
 
-const testURL = 'http://localhost';
-const testPort = 8080;
+const options = {
+  method: 'GET', 
+  cache: 'no-cache', 
+  redirect: 'manual'
+}
 
-mockServer.start(testPort);
-
+const cases = {
+  basic: new URL('http://localhost:8787/sandbox/foxy/'),
+  restricted: new URL('http://localhost:8787/sandbox/foxy/restricted.html'),
+  login: new URL('http://localhost:8787/login/'),
+}
 
 describe('Protect restricted content', () => {
   it ('Redirects anonymous users to the login page.', async () => {
-    const url = `${testURL}:8787/testando`;
-    const response = await fetch(url, {
-      method: 'GET', 
-      cache: 'no-cache', 
-      redirect: 'manual'
-    });
+    const restrictedURL = cases.restricted;
+    const response = await fetch(restrictedURL.toString(), options);
     expect(response.status).to.equal(302);
-    expect(response.headers.get('location')).to.match(/login\/?$/);
+    const location = response.headers.get('location');
+    expect(location).to.exist;
   });
 
   describe('Redirects users back after successful login.', () => {
     it ('Sets a cookie with the destination.', async () => {
-      const url = `${testURL}:8787/testando`;
-      const response = await fetch(url, {
-        method: 'GET', 
-        cache: 'no-cache', 
-        redirect: 'manual'
-      });
+      const response = await fetch(cases.restricted.toString(), options);
       const cookie = response.headers.get('set-cookie') ;
-      expect(cookie).to.contain(url);
+      expect(cookie).to.exist;
+      expect(cookie).to.contain(cases.restricted.pathname);
+    });
+
+    it ('Does not redirect anonymous users away from the login page', async () => {
+      const response = await fetch(cases.login.toString(), options);
+      const cookie = response.headers.get('set-cookie') ;
+      expect(cookie).not.to.contain('fx.cf.guard.destination');
     });
   });
 
-  it ('Does not redirect anonymous users away from the login page');
-  it ('Does not redirect users that were already logged in.');
-  it ('Removes tags identified as restricted if the user is anonymous');
-});
+  it ('Does not redirect users that were already logged in.', async () => {
+    const token = jwt.sign({ foo: 'bar' }, 'foobar'); // The FX_JWT_SECRET for the dev environment is set in the wrangler.toml file.
+    const headers = { cookie: `fx.customer.jwt=${token}` }
+    const loggedIn = { ...options, headers }
+    const response = await fetch(cases.basic.toString(), loggedIn);
+    const cookie = response.headers.get('set-cookie') ;
+    expect(cookie).not.to.contain('fx.cf.guard.destination');
+  });
 
-after(() => {
-  mockServer.end();
-})
+  it ('Removes tags identified as restricted if the user is anonymous', async () => {
+    const response = await fetch(cases.login.toString(), options);
+    const fullBody = await response.text();
+    expect(fullBody).not.to.contain('data-restricted');
+  });
+});
