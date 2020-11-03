@@ -5,7 +5,10 @@
   "description": "A Cloudflare Worker to reuse Foxy.io Customer Portal Authentication to restrict access to pages or contents within a page",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha './{,!(node_modules)/**}/*.test.?js'",
+    "test:start-worker": "wrangler dev --host 'https://ndvo.me' --env development --upstream-protocol https",
+    "test:start-server": "node test/mock/server.cjs",
+    "test:setup": "npm-run-all -r -p test:start-worker test:start-server",
+    "test:run": "nyc mocha './{,!(node_modules)/**}/*.test.?js'",
     "build": "wrangler build --env production",
     "format": "prettier --write '**/*.{js,css,json,md}'"
   },
@@ -26,8 +29,11 @@
     "eslint-plugin-sort-class-members": "^1.8.0",
     "eslint-plugin-typescript-sort-keys": "^1.5.0",
     "mocha": "^6.2.3",
+    "node-fetch": "^2.6.1",
+    "npm-run-all": "^4.1.5",
     "nyc": "^15.1.0",
     "prettier": "^1.19.1",
+    "tcp-port-used": "^1.0.1",
     "typescript": "^4.0.5"
   },
   "dependencies": {
