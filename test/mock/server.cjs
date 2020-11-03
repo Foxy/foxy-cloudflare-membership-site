@@ -18,6 +18,11 @@ let routes = {
       template.unrestricted("Foo")
     );
   },
+  login: function() {
+    return template.html(
+      template.login("Foo")
+    );
+  },
   restricted: function() {
     return template.html(
       [
@@ -29,9 +34,11 @@ let routes = {
   restrictedWithLogin: function() {
     return template.html(
       [
-        template.unrestricted("Foo"),
+        template.unrestricted(
+          template.login("Foo")
+        ),
         template.restricted(
-          template.login("Bar")
+          "Bar"
         ),
       ].join("")
     );
@@ -56,15 +63,9 @@ const server = http.createServer((request, response) => {
   }
 });
 
-module.exports = {
-  start: function(PORT, customRoutes) {
-    routes = { ...routes, ...customRoutes};
-    server.listen(PORT, () => {
-      console.log(`Server listening on port :${PORT} 🚀`);
-    });
-  },
-  paths: Object.keys(routes),
-  end: function() {
-    server.close();
-  }
-}
+const PORT = 80;
+
+server.listen(PORT, () => {
+  console.log(`Server listening on port :${PORT} 🚀`);
+});
+
