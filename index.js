@@ -4,6 +4,8 @@ import * as jwt from "jsonwebtoken";
 const FX_CUSTOMER_JWT_COOKIE = "fx.customer.jwt";
 const FX_CUSTOMER_DESTINATION_COOKIE = "fx.cf.guard.destination";
 
+let loginTag = false;
+
 /** Cloudflare Worker method */
 try {
   // Avoid crashing tests
@@ -40,6 +42,25 @@ function getCookie(request, name) {
   return result;
 }
 
+/** 
+ * Builds a cookie with Path set to /
+ *
+ * @param {string} key the cookie key.
+ * @param {string} value the value the cookie will be set to.
+ * @return {string} cookie to set
+ **/
+function buildCookie(key, value) {
+  return `${key}=${value}; Path=/`;
+}
+
+/**
+ * @param {string} key to be expired
+ * @return {string} the expired cookie
+ **/
+function expireCookie(key) {
+  return `${key}=deleted; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Path=/ `;
+}
+
 /** A handler that removes any element it receives */
 class OmitHandler {
   element(el) {
@@ -51,7 +72,7 @@ class OmitHandler {
  * element is passed to it */
 class LoginFormHandler {
   element(el) {
-    if (el) this.login = true;
+    if (el) loginTag = true;
   }
 }
 
@@ -83,8 +104,9 @@ function cleanURL(dirtyURL) {
   return dirtyURL
     .trim()
     .replace(/\/$/, "")
-    .replace(/([^:])\/\/+/, "$1://");
+    .replace(/:\/\/+/, "://");
 }
+
 
 /**
  * Handles the request
@@ -93,25 +115,20 @@ function cleanURL(dirtyURL) {
  * @returns {Response|Promise<Response>} response
  */
 async function handleRequest(request) {
+  loginTag = false;
   const responsePromise = fetch(request);
   const session = await verify(request);
   if (session) {
     // User is authenticated
-    const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, "$1");
-    const loginPage = `${domain}${FX_REDIRECT}`;
-    if (cleanURL(request.url) === cleanURL(loginPage)) {
+    const loginURL = new URL(FX_REDIRECT, request.url);
+    if (cleanURL(request.url) === cleanURL(loginURL.toString())) {
       const destination = getCookie(request, FX_CUSTOMER_DESTINATION_COOKIE);
       if (destination) {
         // Remove destination cookie and redirect to destination
         return new Response(null, {
           headers: new Headers([
             ["location", destination],
-            [
-              "Set-Cookie",
-              `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(
-                request.url
-              )}; Path=/`
-            ]
+            ["Set-Cookie", expireCookie(FX_CUSTOMER_DESTINATION_COOKIE)]
           ]),
           status: 303
         });
@@ -120,24 +137,19 @@ async function handleRequest(request) {
     return responsePromise;
   } else {
     const response = await responsePromise;
-    const loginHandler = new LoginFormHandler();
     const transformedResponse = new HTMLRewriter()
-      .on("[data-login]", loginHandler)
+      .on("foxy-customer-portal", new LoginFormHandler())
+      .on("[data-login]", new LoginFormHandler())
       .on("[data-restricted]", new OmitHandler())
       .transform(response);
-    if (!loginHandler.login && FX_REDIRECT) {
-      const domain = request.url.replace(/^(https?:\/\/[^/]*)(.*)/, "$1");
-      const loginPage = `${domain}${FX_REDIRECT}`;
+    if (!loginTag && FX_REDIRECT) {
+      const loginURL = new URL(FX_REDIRECT, request.url);
+      const loginPage = loginURL.toString();
       if (cleanURL(request.url) !== cleanURL(loginPage)) {
         return new Response(null, {
           headers: new Headers([
             ["location", loginPage],
-            [
-              "Set-Cookie",
-              `${FX_CUSTOMER_DESTINATION_COOKIE}=${cleanURL(
-                request.url
-              )}; Path=/`
-            ]
+            ["Set-Cookie", buildCookie(FX_CUSTOMER_DESTINATION_COOKIE, cleanURL(request.url))]
           ]),
           status: 302
         });
