@@ -7,8 +7,11 @@ route = ""
 zone_id = ""
 vars = { FX_REDIRECT = "/login/", FX_OMIT = "true" }
 
+[env.development]
+vars = { FX_REDIRECT = "/login/", FX_OMIT = "true", FX_JWT_SECRET = "foobar"}
+
 
 [env.production]
 name = "foxy_customer_portal_authentication_guard"
-webpack_config = "webpack.config.js"
+webpack_config = "webpack.config.cjs"
 vars = { FX_REDIRECT = "/login/", FX_OMIT = "true" }
