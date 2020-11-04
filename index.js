@@ -1,23 +1,16 @@
 /* global HTMLRewriter, FX_REDIRECT, FX_OMIT, FX_JWT_SECRET */
-import * as jwt from "jsonwebtoken";
 
 const FX_CUSTOMER_JWT_COOKIE = "fx.customer.jwt";
 const FX_CUSTOMER_DESTINATION_COOKIE = "fx.cf.guard.destination";
 
+// Flag that indicates that there is a login form in this page so that the user
+// is not redirected out of it.
 let loginTag = false;
 
 /** Cloudflare Worker method */
-try {
-  // Avoid crashing tests
-  addEventListener("fetch", event => {
-    event.respondWith(handleRequest(event.request));
-  });
-} catch(e) {
-  if (e.name !== 'ReferenceError'
-    || e.message !== 'addEventListener is not defined') {
-    throw e;
-  }
-}
+addEventListener("fetch", event => {
+  event.respondWith(handleRequest(event.request));
+});
 
 /**
  * Gets the cookie with given name from the request headers
@@ -42,7 +35,36 @@ function getCookie(request, name) {
   return result;
 }
 
-/** 
+/**
+ * Verify JWT token
+ *
+ * Uses the stored shared secret to verify a JWT token
+ *
+ * @param {string} token to be verified
+ */
+async function verifySignature(token) {
+  const encoder = new TextEncoder();
+  const splitted = token.split(".");
+  const b64data = [
+      b64URL2b64(splitted[0]), 
+      b64URL2b64(splitted[1])
+    ].join(".");
+  const algo = { name: "HMAC", hash: "SHA-256" };
+  const data = encoder.encode(b64data);
+  const b64sig = b64URL2b64(splitted[2]);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(FX_JWT_SECRET),
+    algo,
+    false,
+    ["verify", "sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, data)
+  const correct = btoa(String.fromCharCode.apply(null, new Uint8Array(signature)));
+  return correct == b64sig;
+}
+
+/**
  * Builds a cookie with Path set to /
  *
  * @param {string} key the cookie key.
@@ -80,18 +102,12 @@ class LoginFormHandler {
  * Verify the request has a valid Customer Portal Foxy JWT
  *
  * @param {Request} request incoming Request
- * @returns {string} JWT payload or null if invalid or absent JWT
+ * @returns {Promise<boolean>} true if valid
  */
 async function verify(request) {
   const jwtString = getCookie(request, FX_CUSTOMER_JWT_COOKIE);
   if (!jwtString) return false;
-  let payload;
-  try {
-    payload = await jwt.verify(jwtString, FX_JWT_SECRET);
-  } catch (e) {
-    payload = null;
-  }
-  return payload;
+  return verifySignature(jwtString);
 }
 
 /**
@@ -107,6 +123,25 @@ function cleanURL(dirtyURL) {
     .replace(/:\/\/+/, "://");
 }
 
+/**
+ * Reverts the process of making Base64 compatible with URL
+ *
+ * @param {string} urlCompatible Base64 encoded string
+ * @return {string} regular Base64 encoded string
+ */
+function b64URL2b64(urlCompatible) {
+  // Replace non-url compatible chars with base64 standard chars
+  let b64 = urlCompatible
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  // Pad out with standard base64 required padding characters
+  const pad = b64.length % 4;
+  if (pad) {
+    if(pad === 1) throw new Error('InvalidLengthError');
+    b64 += new Array(5-pad).join('=');
+  }
+  return b64;
+}
 
 /**
  * Handles the request
@@ -149,7 +184,10 @@ async function handleRequest(request) {
         return new Response(null, {
           headers: new Headers([
             ["location", loginPage],
-            ["Set-Cookie", buildCookie(FX_CUSTOMER_DESTINATION_COOKIE, cleanURL(request.url))]
+            [
+              "Set-Cookie",
+              buildCookie(FX_CUSTOMER_DESTINATION_COOKIE, cleanURL(request.url))
+            ]
           ]),
           status: 302
         });
