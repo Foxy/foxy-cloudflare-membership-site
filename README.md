@@ -2,7 +2,7 @@
 
 **This Cloudflare Worker is meant to be used with Foxy Customer Portal** : https://github.com/Foxy/foxy-customer-portal
 
-### Overview
+## Overview
 
 [Cloudflare Workers](https://workers.cloudflare.com) sit on the "edge" between the Frontend and the Backend.
 
@@ -12,47 +12,50 @@ This worker uses [Foxy.io Customer Portal Authentication](https://github.com/Fox
 
 This means you can provide a restricted area even if you are working with a JAMStack application such as 11ty.js, a purely static HTML page or a website running in a third party server.
 
-#### Restrict access to pages
-
-If you with to redirect anonymous users to the login page:
+### Restrict access to pages
 
 - set the `FX_REDIRECT` variable to the Customer Portal page.
 - set the routes to be protected in the Workers tab of your domain administration in Cloudflare
+    - Go to your domain settings
+    - click on the Workers button
+    - click "Add route" and set the worker to use and the routes it should be active on
 
-This is the default behaviour.
+### Restrict access to tags
 
-#### Restrict access to tags
+If you wish to restrict certain tags within a page add a `data-restricted` attribute to the tags you want to restrict.
 
-If you wish to restrict only certain tags within a page:
+You may set an empty value to `FX_REDIRECT` if you don't want the user to be redirected.
 
-- set an empty value to `FX_REDIRECT` if you don't want the user to be redirected.
-  - if both omitting tags is enabled and redirecting, tags in the login page can be omitted.
-- set `FX_OMIT` to "true" (this is set by default).
-- add a `data-restricted` attribute to the tags you want to restrict.
+Example:
 
 ```html
-<body>
-  <nav>
-    <a href="/login">login</a>
-  </nav>
-  <section data-restricted="true" class="member-area"></section>
-  <section class="open-area"></section>
-</body>
+<header>
+    ...
+    <div data-restricted >Welcome back</div>
+</header>
+<main>
+    <foxy-customer-portal endpoint="..."></foxy-customer-portal>
+</main>
 ```
 
 # How to set up
+
+#### Setup Overview
 
 1. Fork this repository
 1. Set up GitHub secrets in your forked repository
 1. Deploy to Cloudflare Workers using the provided GitHub action
 
-## Fork
+## Fork this repository
 
 Click the "fork" button on the top right of this page. Give your repository a proper name.
 
-## Set GitHub secrets
+This step allows you to use this worker without the need to create a development environment and use `wrangler`.
+If you are familiar with `wrangler` you can simply use `wrangler secret` and `wrangler publish` without the need to use GitHub Actions.
 
-In your forked repository, click the "**Settings**" tab, then the "**Secrets**" tab.
+## Set up GitHub secrets
+
+In you forked repository, click the "**Settings**" tab, then the "**Secrets**" tab.
 
 Using the "New secret" button create the following secrets:
 
@@ -62,7 +65,9 @@ Using the "New secret" button create the following secrets:
 | `CF_API_TOKEN`      | This is your API token. Click the "API Tokens" tab. Select an appropriate token or create a new one. If you'll use an existing, on the rightmost menu choose "Roll" and copy the token. [How to get my Cloudflare API token](https://developers.cloudflare.com/workers/learning/getting-started#option-1-obtaining-your-api-token-recommended) |
 | `JWT_SHARED_SECRET` | This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal](#how-to-configure-my-customer-portal).                                                                                                                                                   |
 
-### Configuring your worker
+If your are using `wrangler` you can configure `JWT_SHARED_SECRET` using `wrangler secret` and use `wrangler config` or `wrangler login` to configure the Cloudflare authentication variables.
+
+## Configuring your worker
 
 On your worker's page, under the `Settings` tab you can edit the variables used by this worker.
 
@@ -70,10 +75,11 @@ You may also configure them using the `wrangler.toml` file.
 
 Look for the line `vars = { ... }` and edit the values your variables:
 
-| Variable      | Description                                                                                                                       | Example                                    |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login'                                   |
-| `FX_OMIT`     | If you wish the worker to remove any tags with the attribute `data-restricted` if the user is not authenticated.                  | "true" any other value is considered false |
+| Variable      | Description                                                                                                                       | Example                                    | Default |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------- |
+| `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login'                                   | '/customer-portal'|
+
+
 
 ### Deploy your worker
 
@@ -105,13 +111,13 @@ Example:
 
 Use `customer/*` to protect pages such as `customer/members-only-products` and `customer/reach-out`.
 
-Be careful with trailing slashes when setting your routes. [Learn more about matching behaviour of routes](https://developers.cloudflare.com/workers/platform/routes#matching-behavior)
+**Be careful with trailing slashes when setting your routes**. [Learn more about matching behaviour of routes](https://developers.cloudflare.com/workers/platform/routes#matching-behavior)
 
 # Development
 
 If you wish to customize this Worker, the instructions bellow may be helpful setting up your development environment.
 
-#### How to configure my Customer Portal
+### How to configure my Customer Portal
 
 This document does not aim to explain how to use your Customer Portal.
 
@@ -136,6 +142,7 @@ Use a PUT or PATCH request to configure your Customer Portal.
 In order to use the Customer Portal Authentication Guard you'll need to provide the Guard the `jwtSharedSecret`.
 
 You set this value when configuring the Customer Portal. Please, note that the secret must not be public and must not be shared.
+
 The following OpenSSL command can be used to generate a secret.
 
 ```bash
@@ -150,7 +157,7 @@ Notice you can check your existing customers using this API path:
 
 You can POST to `fx:customers` to create a new customer to test this Worker.
 
-# Development environment
+## Development environment
 
 You'll need `wrangler` to run your worker in a development environment. [View instructions to install it.](https://developers.cloudflare.com/workers/cli-wrangler/install-update)
 You'll need `cloudflared` to view logs from production, if you need it. [View instructions to install it.](https://developers.cloudflare.com/argo-tunnel/downloads)

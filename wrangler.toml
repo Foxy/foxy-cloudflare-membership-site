@@ -4,12 +4,11 @@ account_id = "CF_ACCOUNT_ID"
 workers_dev = true
 route = ""
 zone_id = ""
-vars = { FX_REDIRECT = "/login/", FX_OMIT = "true" }
+vars = { FX_REDIRECT = "/customer-portal/" }
 
 [env.development]
-vars = { FX_REDIRECT = "/login/", FX_OMIT = "true", FX_JWT_SECRET = "foobar"}
-
+vars = { FX_REDIRECT = "/customer-portal/", FX_JWT_SECRET = "foobar"}
 
 [env.production]
 name = "foxy_customer_portal_authentication_guard"
-vars = { FX_REDIRECT = "/login/", FX_OMIT = "true" }
+vars = { FX_REDIRECT = "/customer-portal/" }

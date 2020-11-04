@@ -1,4 +1,4 @@
-/* global HTMLRewriter, FX_REDIRECT, FX_OMIT, FX_JWT_SECRET */
+/* global HTMLRewriter, FX_REDIRECT, FX_JWT_SECRET */
 
 const FX_CUSTOMER_JWT_COOKIE = "fx.customer.jwt";
 const FX_CUSTOMER_DESTINATION_COOKIE = "fx.cf.guard.destination";
@@ -86,7 +86,7 @@ function expireCookie(key) {
 /** A handler that removes any element it receives */
 class OmitHandler {
   element(el) {
-    if (FX_OMIT) el.remove();
+    el.remove();
   }
 }
 
