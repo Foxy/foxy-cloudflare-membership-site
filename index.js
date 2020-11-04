@@ -45,22 +45,31 @@ function getCookie(request, name) {
 async function verifySignature(token) {
   const encoder = new TextEncoder();
   const splitted = token.split(".");
-  const b64data = [
-      b64URL2b64(splitted[0]), 
-      b64URL2b64(splitted[1])
-    ].join(".");
+  const b64data = [b64URL2b64(splitted[0]), b64URL2b64(splitted[1])].join(".");
   const algo = { name: "HMAC", hash: "SHA-256" };
   const data = encoder.encode(b64data);
   const b64sig = b64URL2b64(splitted[2]);
-  const key = await crypto.subtle.importKey(
-    "raw",
-    encoder.encode(FX_JWT_SECRET),
-    algo,
-    false,
-    ["verify", "sign"]
+  let key;
+  try {
+    key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(FX_JWT_SECRET),
+      algo,
+      false,
+      ["verify", "sign"]
+    );
+  } catch (e) {
+    if (e.name == "ReferenceError") {
+      console.error(e);
+      return false;
+    } else {
+      throw e;
+    }
+  }
+  const signature = await crypto.subtle.sign("HMAC", key, data);
+  const correct = btoa(
+    String.fromCharCode.apply(null, new Uint8Array(signature))
   );
-  const signature = await crypto.subtle.sign("HMAC", key, data)
-  const correct = btoa(String.fromCharCode.apply(null, new Uint8Array(signature)));
   return correct == b64sig;
 }
 
@@ -131,14 +140,12 @@ function cleanURL(dirtyURL) {
  */
 function b64URL2b64(urlCompatible) {
   // Replace non-url compatible chars with base64 standard chars
-  let b64 = urlCompatible
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  let b64 = urlCompatible.replace(/-/g, "+").replace(/_/g, "/");
   // Pad out with standard base64 required padding characters
   const pad = b64.length % 4;
   if (pad) {
-    if(pad === 1) throw new Error('InvalidLengthError');
-    b64 += new Array(5-pad).join('=');
+    if (pad === 1) throw new Error("InvalidLengthError");
+    b64 += new Array(5 - pad).join("=");
   }
   return b64;
 }
