@@ -26,23 +26,19 @@ This is the default behaviour.
 If you wish to restrict only certain tags within a page:
 
 - set an empty value to `FX_REDIRECT` if you don't want the user to be redirected.
-    - if both omitting tags is enabled and redirecting, tags in the login page can be omitted.
+  - if both omitting tags is enabled and redirecting, tags in the login page can be omitted.
 - set `FX_OMIT` to "true" (this is set by default).
 - add a `data-restricted` attribute to the tags you want to restrict.
 
-
 ```html
 <body>
-    <nav>
-      <a href="/login">login</a>
-    </nav>
-    <section data-restricted="true" class="member-area">
-    </section>
-    <section class="open-area">
-    </section>
+  <nav>
+    <a href="/login">login</a>
+  </nav>
+  <section data-restricted="true" class="member-area"></section>
+  <section class="open-area"></section>
 </body>
 ```
-
 
 # How to set up
 
@@ -60,11 +56,11 @@ In your forked repository, click the "**Settings**" tab, then the "**Secrets**" 
 
 Using the "New secret" button create the following secrets:
 
-| Secret | Description | 
-| -------- | ----------- | 
-| `CF_ACCOUNT_ID` | This is your Cloudflare Id. To get your ID, click the "Menu" next to Cloudflare's logo and, under "Products", click Workers. Your Client ID will be on the right sidebar. [How to get my Cloudflare Id](https://developers.cloudflare.com/workers/learning/getting-started#6a-obtaining-your-account-id-and-zone-id)|
-| `CF_API_TOKEN` | This is your API token. Click the "API Tokens" tab. Select an appropriate token or create a new one. If you'll use an existing, on the rightmost menu choose "Roll" and copy the token. [How to get my Cloudflare API token](https://developers.cloudflare.com/workers/learning/getting-started#option-1-obtaining-your-api-token-recommended)
-| `JWT_SHARED_SECRET`| This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal](#how-to-configure-my-customer-portal).|
+| Secret              | Description                                                                                                                                                                                                                                                                                                                                    |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CF_ACCOUNT_ID`     | This is your Cloudflare Id. To get your ID, click the "Menu" next to Cloudflare's logo and, under "Products", click Workers. Your Client ID will be on the right sidebar. [How to get my Cloudflare Id](https://developers.cloudflare.com/workers/learning/getting-started#6a-obtaining-your-account-id-and-zone-id)                           |
+| `CF_API_TOKEN`      | This is your API token. Click the "API Tokens" tab. Select an appropriate token or create a new one. If you'll use an existing, on the rightmost menu choose "Roll" and copy the token. [How to get my Cloudflare API token](https://developers.cloudflare.com/workers/learning/getting-started#option-1-obtaining-your-api-token-recommended) |
+| `JWT_SHARED_SECRET` | This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal](#how-to-configure-my-customer-portal).                                                                                                                                                   |
 
 ### Configuring your worker
 
@@ -74,10 +70,10 @@ You may also configure them using the `wrangler.toml` file.
 
 Look for the line `vars = { ... }` and edit the values your variables:
 
-| Variable | Description | Example |
-| -------- | ----------- | ------- |
-| `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login' |
-| `FX_OMIT` | If you wish the worker to remove any tags with the attribute `data-restricted` if the user is not authenticated.| "true" any other value is considered false |
+| Variable      | Description                                                                                                                       | Example                                    |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login'                                   |
+| `FX_OMIT`     | If you wish the worker to remove any tags with the attribute `data-restricted` if the user is not authenticated.                  | "true" any other value is considered false |
 
 ### Deploy your worker
 
@@ -89,9 +85,8 @@ If you wish to deploy to Cloudflare after each push, edit the `.github/workflows
 
 ```
   push:
-    branches: 
+    branches:
       - main
-      - master
 ```
 
 ### Configure your Domain
@@ -112,7 +107,6 @@ Use `customer/*` to protect pages such as `customer/members-only-products` and `
 
 Be careful with trailing slashes when setting your routes. [Learn more about matching behaviour of routes](https://developers.cloudflare.com/workers/platform/routes#matching-behavior)
 
-
 # Development
 
 If you wish to customize this Worker, the instructions bellow may be helpful setting up your development environment.
@@ -128,14 +122,12 @@ Documentation for the Customer Portal Settings can be found here:
 - `https://docs.foxycart.com/v/2.0/customer_portal`
 - `https://api.foxycart.com/rels/customer_portal_settings`
 
-
 You will be using the [Foxy API](https://api.foxycart.com/docs) in order to create your Customer Portal.
 You will find it's documentation here:
 
 - https://api.foxycart.com/docs
 
 You can create your Customer Portal following these API links:
-
 
 `API Home` » `fx:store` » `fx:customer_portal_settings`
 
@@ -204,7 +196,6 @@ wrangler tail --env production | jq
 ### Setting your JWT Shared Secret with wrangler
 
 You need to use the `wrangler` tool to set up your secret:
-
 
 Next, set your secret:
 
