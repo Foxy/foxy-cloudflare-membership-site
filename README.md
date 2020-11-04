@@ -16,9 +16,9 @@ This means you can provide a restricted area even if you are working with a JAMS
 
 - set the `FX_REDIRECT` variable to the Customer Portal page.
 - set the routes to be protected in the Workers tab of your domain administration in Cloudflare
-    - Go to your domain settings
-    - click on the Workers button
-    - click "Add route" and set the worker to use and the routes it should be active on
+  - Go to your domain settings
+  - click on the Workers button
+  - click "Add route" and set the worker to use and the routes it should be active on
 
 ### Restrict access to tags
 
@@ -30,11 +30,11 @@ Example:
 
 ```html
 <header>
-    ...
-    <div data-restricted >Welcome back</div>
+  ...
+  <div data-restricted>Welcome back</div>
 </header>
 <main>
-    <foxy-customer-portal endpoint="..."></foxy-customer-portal>
+  <foxy-customer-portal endpoint="..."></foxy-customer-portal>
 </main>
 ```
 
@@ -75,11 +75,9 @@ You may also configure them using the `wrangler.toml` file.
 
 Look for the line `vars = { ... }` and edit the values your variables:
 
-| Variable      | Description                                                                                                                       | Example                                    | Default |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------- |
-| `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login'                                   | '/customer-portal'|
-
-
+| Variable      | Description                                                                                                                       | Example  | Default            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------ |
+| `FX_REDIRECT` | The URL an unauthenticated user must be redirected to. This is should be the URL where you have the `<foxy-customer-portal>` tag. | '/login' | '/customer-portal' |
 
 ### Deploy your worker
 
