@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "version": "1.0.0",
+  "description": "A mock server for testing the worker",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {}
+}

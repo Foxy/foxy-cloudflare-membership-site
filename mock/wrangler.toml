@@ -1,0 +1,7 @@
+name = "mock_foxy_cloudflare_membership_site"
+type = "javascript"
+account_id = "ef49b74aa7e763d13ef6546c988292c3"
+workers_dev = true
+route = ""
+zone_id = ""
+
