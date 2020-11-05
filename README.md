@@ -111,6 +111,14 @@ Use `customer/*` to protect pages such as `customer/members-only-products` and `
 
 **Be careful with trailing slashes when setting your routes**. [Learn more about matching behaviour of routes](https://developers.cloudflare.com/workers/platform/routes#matching-behavior)
 
+You can also use the `routes` variable within `wrangler.toml` file to set the target routes.
+
+Example:
+
+```toml
+routes = ["restricted/*", "restricted" ]
+```
+
 # Development
 
 If you wish to customize this Worker, the instructions bellow may be helpful setting up your development environment.
@@ -209,3 +217,13 @@ wrangler secret put FX_JWT_SECRET
 ```
 
 The tool will ask you for your secret. This is the secret you created when setting your Customer Portal.
+
+### Automated tests
+
+This repository includes a second worker in the `mock` directory that is used in automated tests.
+
+Tests are executed against a live server because tests are executed "on the edge", that is, in Cloudflare's servers.
+
+To overcome this difficulty a very simple server is provided for tests. Upon running `npm run test:start-worker` a Cloudflare Worker will be published in your account to service a mock website against which the tests will run.
+
+Please note that you will need to remove this mock worker manually from your account.
