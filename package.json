@@ -5,11 +5,10 @@
   "description": "A Cloudflare Worker to reuse Foxy.io Customer Portal Authentication to restrict access to pages or contents within a page",
   "main": "index.js",
   "scripts": {
-    "test:start-worker": "wrangler dev --host 'https://ndvo.me' --env development --upstream-protocol https",
-    "test:start-server": "node test/mock/server.cjs",
-    "test:setup": "npm-run-all -r -p test:start-worker test:start-server",
-    "test:run": "nyc mocha './{,!(node_modules)/**}/*.test.?js'",
+    "test:start-worker": "fx_mock_url=$(npm run mock:publish) && fx_mock_url=${fx_mock_url##* } && fx_mock_url=$(echo $fx_mock_url | sed -e 's/https/http/') && wrangler dev --host $fx_mock_url --env development --upstream-protocol=http",
+    "test": "echo 'Make sure the worker is running before executing the tests.\n' && nyc mocha './{,!(node_modules)/**}/*.test.?js'",
     "build": "wrangler build --env production",
+    "mock:publish": "cd mock && wrangler publish ",
     "format": "prettier --write '**/*.{js,css,json,md}'"
   },
   "type": "module",
@@ -28,6 +27,7 @@
     "eslint-plugin-lit-a11y": "^1.0.1",
     "eslint-plugin-sort-class-members": "^1.8.0",
     "eslint-plugin-typescript-sort-keys": "^1.5.0",
+    "jsonwebtoken": "^8.5.1",
     "mocha": "^6.2.3",
     "node-fetch": "^2.6.1",
     "npm-run-all": "^4.1.5",
@@ -36,7 +36,6 @@
     "tcp-port-used": "^1.0.1",
     "typescript": "^4.0.5"
   },
-  "dependencies": {},
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
