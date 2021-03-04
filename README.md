@@ -44,6 +44,7 @@ Example:
 
 1. Fork this repository
 1. Set up GitHub secrets in your forked repository
+1. Set up Cloudflare for your domain, set to proxy.
 1. Deploy to Cloudflare Workers using the provided GitHub action
 
 ## Fork this repository
@@ -66,6 +67,12 @@ Using the "New secret" button create the following secrets:
 | `JWT_SHARED_SECRET` | This is the Shared Secret. If you have already configured your Customer Portal, use the same Shared Secret Key. [How to configure my Customer Portal](#how-to-configure-my-customer-portal).                                                                                                                                                   |
 
 If your are using `wrangler` you can configure `JWT_SHARED_SECRET` using `wrangler secret` and use `wrangler config` or `wrangler login` to configure the Cloudflare authentication variables.
+
+## Set up Cloudflare for your domain and DNS
+
+This step is far beyond the scope of this readme, but Cloudflare's docs are good. Note that you must be using Cloudflare's DNS set to "proxy" (the orange cloud next to the record) for this whole thing to work. Some systems (like [Webflow](https://webflow.com/)) might instruct you not to do this, but it is _usually_ fine.
+
+For safety, we do recommend making sure Cloudflare's Rocket Loader is _disabled_. This piece has been known to cause problems, especially with ecommerce sites.
 
 ## Configuring your worker
 
