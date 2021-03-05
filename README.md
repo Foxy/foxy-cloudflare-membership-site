@@ -1,4 +1,4 @@
-# Foxy.io Customer Portal Authentication Guard
+# Foxy.io Customer Membership Site
 
 **This Cloudflare Worker is meant to be used with Foxy Customer Portal** : https://github.com/Foxy/foxy-customer-portal
 
