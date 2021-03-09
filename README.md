@@ -130,7 +130,7 @@ routes = ["restricted/*", "restricted" ]
 
 If you wish to customize this Worker, the instructions bellow may be helpful setting up your development environment.
 
-### How to configure my Customer Portal
+## How to configure my Customer Portal
 
 This document does not aim to explain how to use your Customer Portal.
 
@@ -189,7 +189,7 @@ You can do this in one of two ways: with `wrangler login` or `wrangler config`.
 wrangler login
 ```
 
-- Authenticate with `wrangler config`. First grab your token from your Cloudflare Workers account
+- Authenticate with `wrangler config`. First grab your token from your Cloudflare Workers account (you can find a link on the sidebar at the Workers page in your account).
 
 ```bash
 wrangler config
