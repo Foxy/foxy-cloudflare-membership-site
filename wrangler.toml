@@ -1,4 +1,4 @@
-name = "foxy_cloudflare_membership_site"
+name = "dev-foxy-membership-site"
 type = "javascript"
 account_id = "CF_ACCOUNT_ID"
 workers_dev = true
@@ -10,5 +10,5 @@ vars = { FX_REDIRECT = "/customer-portal" }
 vars = { FX_REDIRECT = "/customer-portal", FX_JWT_SECRET = "foobar"}
 
 [env.production]
-name = "foxy_customer_portal_authentication_guard"
-vars = { FX_REDIRECT = "/customer-portal" }
+name = "foxy-membership-site"
+vars = { FX_REDIRECT = "/customer-portal"}
