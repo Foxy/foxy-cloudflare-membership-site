@@ -1,4 +1,4 @@
-name = "dev-foxy-membership-site"
+name = "dev-foxy-membership-site" # this variable should not include underscores.
 type = "javascript"
 account_id = "CF_ACCOUNT_ID"
 workers_dev = true
@@ -10,5 +10,5 @@ vars = { FX_REDIRECT = "/customer-portal" }
 vars = { FX_REDIRECT = "/customer-portal", FX_JWT_SECRET = "foobar"}
 
 [env.production]
-name = "foxy-membership-site"
+name = "foxy-membership-site" # this variable should not include underscores.
 vars = { FX_REDIRECT = "/customer-portal"}
