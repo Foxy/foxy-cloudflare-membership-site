@@ -112,6 +112,8 @@ This interface will allow you to choose to which pages in your site the worker w
 
 **This worker should be active in all pages you wish to restrict access.**
 
+**This worker should be also active in the FX_REDIRECT URL.** That is, the URL where the `<foxy<foxy-customer-portal>` tag lives.
+
 Example:
 
 Use `customer/*` to protect pages such as `customer/members-only-products` and `customer/reach-out`.
@@ -123,7 +125,7 @@ You can also use the `routes` variable within `wrangler.toml` file to set the ta
 Example:
 
 ```toml
-routes = ["restricted/*", "restricted" ]
+routes = ["restricted/*", "restricted", "dashboard" ]
 ```
 
 # Development
@@ -146,29 +148,42 @@ You will find it's documentation here:
 
 - https://api.foxycart.com/docs
 
+### Creating the Customer Portal
+
+You can use Postman or similar tool to create your Customer Portal.
+
+- if you are unfamiliar with this check out this video about exploring FoxyAPI with Postman: https://www.youtube.com/watch?v=Merz57p9Fcc
+
 You can create your Customer Portal following these API links:
 
-`API Home` » `fx:store` » `fx:customer_portal_settings`
+- `API Home` » `fx:store` » `fx:customer_portal_settings`
+
+### Configuring your Customer Portal
 
 Use a PUT or PATCH request to configure your Customer Portal.
 
-In order to use the Customer Portal Authentication Guard you'll need to provide the Guard the `jwtSharedSecret`.
+The `jwtSharedSecret` value must be the same in both the Customer Portal and this worker.
 
-You set this value when configuring the Customer Portal. Please, note that the secret must not be public and must not be shared.
-
-The following OpenSSL command can be used to generate a secret.
-
-```bash
-openssl rand -base64 60
-```
+You set this value when configuring the Customer Portal.
+Please, note that the secret **must not be public and must not be shared**.
 
 Set `SSO` to true.
 
-Notice you can check your existing customers using this API path:
+### Using the API to list and create customers
+
+You can check your existing customers using this API path:
 
 `API Home` » `fx:store` » `fx:customers`
 
 You can POST to `fx:customers` to create a new customer to test this Worker.
+
+### How to create a secure secret
+
+The following OpenSSL command can be used to generate a new secret, if you need it.
+
+```bash
+openssl rand -base64 60
+```
 
 ## Development environment
 
