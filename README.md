@@ -19,6 +19,7 @@ This means you can provide a restricted area even if you are working with a JAMS
   - Go to your domain settings
   - click on the Workers button
   - click "Add route" and set the worker to use and the routes it should be active on
+- the Customer Portal Page must also be a protected route.
 
 ### Restrict access to tags
 
