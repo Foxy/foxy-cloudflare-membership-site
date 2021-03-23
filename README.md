@@ -161,6 +161,13 @@ You can create your Customer Portal following these API links:
 
 ### Configuring your Customer Portal
 
+You will need to configure your Customer Portal providing:
+
+- a `jwtSharedSecret`, which should be also provided as a secret to the worker.
+- the `allowedOrigins`
+- the `SSO` option
+
+#### Shared Secret
 Use a PUT or PATCH request to configure your Customer Portal.
 
 The `jwtSharedSecret` value must be the same in both the Customer Portal and this worker.
@@ -168,6 +175,14 @@ The `jwtSharedSecret` value must be the same in both the Customer Portal and thi
 You set this value when configuring the Customer Portal.
 Please, note that the secret **must not be public and must not be shared**.
 
+#### Allowed Origins
+
+You need to add these cloudflare domains to the allowed origins:
+
+- https://cloudflareworkers.com
+- https://dash.cloudflare.com
+
+#### SSO option
 Set `SSO` to true.
 
 ### Using the API to list and create customers
