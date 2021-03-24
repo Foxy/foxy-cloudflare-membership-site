@@ -45,6 +45,7 @@ async function handleRequest(request) {
       .on("foxy-customer-portal", new LoginFormHandler())
       .on("[data-login]", new LoginFormHandler())
       .on("[data-restricted]", new OmitHandler())
+      .on("foxy-customer-portal", new ReloadOnLoginHandler())
       .transform(response);
     if (!loginTag && FX_REDIRECT) {
       const loginURL = new URL(FX_REDIRECT, request.url);
@@ -181,10 +182,7 @@ function expireCookie(key) {
  * element is passed to it */
 class LoginFormHandler {
   element(el) {
-    if (el) {
-      loginTag = true;
-      el.after(reloadScript, {html: true} );
-    }
+    if (el) loginTag = true;
   }
 }
 
@@ -195,174 +193,19 @@ class OmitHandler {
   }
 }
 
-/**
- * This script makes foxy-customer-portal login reload on successful login.
- *
- * It should be added after the foxy-customer-portal tag.
- */
-const reloadScript = `<script>
-    (function () {
-        var authenticated;
-        var activeSubs;
-        var activeSubCodes = [];
-        var transactionCodes = [];
-        var useLatestTransactionOnly = true;
-        var customerFirstName;
-        var protectedPath = "/members";
-        var loginOrSignupPath = "/";
-        var portal = document.getElementsByTagName("foxy-customer-portal")[0];
+/** Adds a script to reload on signout and signin events */
+class ReloadOnLoginHandler {
+  element (el) {
+    el.after(`
+<script>
+  var els = document.getElementsByTagName("${el.tagName}");
+  var reloadable = els[els.length -1];
+  if (reloadable) {
+    reloadable.addEventListener("signout", () => window.location.reload());
+    reloadable.addEventListener("signin", () => window.location.reload());
+  }
+</script>`,  { html: true}
+    );
+  }
+}
 
-        // Allow overriding of class names.
-        var classIfAuthenticated = "foxy-show-if-authenticated";
-        var classIfAnonymous = "foxy-show-if-anonymous";
-        var classIfSubscriber = "foxy-show-if-subscriber";
-        var classIfNotSubscriber = "foxy-show-if-not-subscriber";
-        var classIfSubscriberByCode = "foxy-show-if-subscribed-to-"; // subscription code is appended to the end of this class
-        var classIfTransactionByCode = "foxy-show-if-transaction-with-"; // transaction code is appended to the end of this class
-        var classCustomerFirstName = "foxy-customer-first-name";
-
-        var removeElements = function (className) {
-            Array.prototype.slice
-                .call(document.querySelectorAll("." + className))
-                .forEach(e => {
-                    e.remove();
-                });
-        };
-
-        var updatePage = function () {
-            authenticated
-                ? removeElements(classIfAnonymous)
-                : removeElements(classIfAuthenticated);
-            (authenticated && activeSubs)
-                ? removeElements(classIfNotSubscriber)
-                : removeElements(classIfSubscriber);
-
-            var subCodeClasses = activeSubCodes.map(code => {
-                return classIfSubscriberByCode + code;
-            });
-            Array.prototype.slice
-                .call(document.querySelectorAll('[class*="' + classIfSubscriberByCode + '"]'))
-                .forEach(el => {
-                    var codeClass = el.className.match(new RegExp(classIfSubscriberByCode + "([^ ]+)"));
-                    if (!codeClass || !subCodeClasses.includes(codeClass[0])) {
-                        el.remove();
-                    }
-                });
-
-            var transactionCodeClasses = transactionCodes.map(code => {
-                return classIfTransactionByCode + code;
-            });
-            Array.prototype.slice
-                .call(document.querySelectorAll('[class*="' + classIfTransactionByCode + '"]'))
-                .forEach(el => {
-                    var codeClass = el.className.match(new RegExp(classIfTransactionByCode + "([^ ]+)"));
-                    if (!codeClass || !transactionCodeClasses.includes(codeClass[0])) {
-                        el.remove();
-                    }
-                });
-
-            if (customerFirstName) {
-                Array.prototype.slice
-                    .call(document.querySelectorAll('.' + classCustomerFirstName))
-                    .forEach(el => {
-                        el.innerHTML = customerFirstName;
-                    });
-            }
-
-            if (
-                window.location.pathname.match(new RegExp("^" + protectedPath))
-                && (!authenticated || !activeSubs)
-            ) {
-                window.location.assign(window.location.origin + loginOrSignupPath);
-            }
-        };
-
-        var init = function () {
-            try {
-                authenticated = document.cookie.match(/fx\.customer=([^;]+)/)[1];
-                subData = document.cookie.match(/fx\.customer\.subs=([^;]+)/)[1];
-                activeSubs = subData.split("|")[0];
-                if (subData.indexOf("|") > -1) {
-                    activeSubCodes = subData.substring(subData.indexOf('|') + 1).split("|");
-                }
-                transactionCodes = document.cookie.match(/fx\.customer\.transactions=([^;]+)/)[1].split("|");
-                customerFirstName = document.cookie.match(/fx\.customer\.firstName=([^;]+)/)[1];
-            } catch { }
-            if (!authenticated) clearCustomCookies();
-            updatePage();
-        };
-
-        var clearCustomCookies = function () {
-            document.cookie = "fx.customer.subs=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            document.cookie = "fx.customer.transactions=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            document.cookie = "fx.customer.firstName=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            activeSubs = 0;
-            activeSubCodes = [];
-            transactionCodes = [];
-            customerFirstName = false;
-        }
-
-        if (portal) {
-            portal.addEventListener("signout", function (e) {
-                clearCustomCookies();
-                window.location.reload();
-            });
-            portal.addEventListener("signin", function (e) {
-                portal.addEventListener("update", function (e) {
-                    var subs = [];
-                    var transactions = [];
-                    var active = 0;
-                    var sCodes = [];
-                    var tCodes = [];
-                    if (e.detail._embedded && e.detail._embedded["fx:subscriptions"]) {
-                        subs = e.detail._embedded["fx:subscriptions"];
-                    }
-                    for (var i = 0; i < subs.length; i++) {
-                        var sub = subs[i];
-                        if (sub.is_active) {
-                            active += 1;
-                            var items = sub._embedded["fx:transaction_template"]._embedded["fx:items"];
-                            for (let o = 0; o < items.length; o++) {
-                                if (items[o].code != "") {
-                                    sCodes.push(items[o].code);
-                                }
-                            }
-                        }
-                    }
-                    if (active > 0) {
-                        var data = active;
-                        if (sCodes.length > 0) {
-                            data += "|" + sCodes.join("|")
-                        }
-                        document.cookie = "fx.customer.subs=" + data + ";path=/;secure;samesite=strict";
-                    } else {
-                        document.cookie = "fx.customer.subs=0;path=/;secure;samesite=strict";
-                    }
-
-                    if (e.detail._embedded && e.detail._embedded["fx:transactions"]) {
-                        transactions = e.detail._embedded["fx:transactions"];
-                    }
-                    for (var i = 0; i < transactions.length; i++) {
-                        var items = transactions[i]._embedded["fx:items"];
-                        for (let o = 0; o < items.length; o++) {
-                            if (items[o].code != "") {
-                                tCodes.push(items[o].code);
-                            }
-                        }
-
-                        if (useLatestTransactionOnly && i == 0) break;
-                    }
-
-                    if (tCodes.length > 0) {
-                        document.cookie = "fx.customer.transactions=" + tCodes.join("|") + ";path=/;secure;samesite=strict";
-                    }
-
-                    document.cookie = "fx.customer.firstName=" + e.detail.first_name + ";path=/;secure;samesite=strict";
-                    window.location.reload();
-                });
-            });
-        }
-
-        init();
-    })();
-</script>`;
